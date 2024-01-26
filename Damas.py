@@ -4,7 +4,6 @@ Created on Tue Apr 30 20:05:12 2019
 
 @author: lucas
 """
-from test import movida_valida_v2
 
 #Keep testing for player 2
 Tablero = [["X","_","_","_","_","_","_","_"],
@@ -23,6 +22,7 @@ Tablero = [["_","_","_","_","_","_","_","_"],
            ["_","_","_","_","_","_","_","_"],
            ["_","_","_","_","_","_","O","_"],
            ["_","_","_","_","_","_","_","O"]]
+
 player1 = "X"
 player2 = "O"
 
@@ -43,23 +43,27 @@ def imprimir_tablero(matriz):
     print()
 
 def crear_tablero():
+    size = 8
     matriz=[]
     x="_"
-    for i in range(8):
+    for i in range(size):
         fila=[]
-        for j in range(8):
+        for j in range(size):
             fila.append(x)
         matriz.append(fila)
     return matriz
 
 def armar_tablero(matriz):
     num1 = 12
+    place = False
     for i in range(len(matriz)):
-        for j in range(1 if i%2==0 else 0,len(matriz),2):
-            if(num1 > 0):
+        for j in range(len(matriz)):
+            if(num1 > 0 and place):
                 matriz[i][j] = player1
-                matriz[-i-1][j] = player2
+                matriz[-i-1][-j-1] = player2
                 num1-=1
+            place = not place
+        place = not place
     return matriz
 
 #CHECK FOR KINGS, maybe just add an or case for if piece == QQ or another letter
@@ -111,7 +115,6 @@ def movida_valida_v2(player_sym, enemy_sym, pos, matriz):
     else:
         if(pos[1][0] - pos[0][0] > 1):
             return "should be no more than one space"        
-
 
 Tablero = crear_tablero()
 Tablero = armar_tablero(Tablero)
