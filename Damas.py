@@ -6,6 +6,7 @@ Created on Tue Apr 30 20:05:12 2019
 """
 
 #Keep testing for player 2
+#Error with  single move for player 2
 Tablero = [["X","_","_","_","_","_","_","_"],
            ["_","X","_","_","_","_","_","_"],
            ["_","_","_","_","_","_","_","_"],
@@ -14,19 +15,18 @@ Tablero = [["X","_","_","_","_","_","_","_"],
            ["_","X","_","O","_","X","_","_"],
            ["_","_","_","_","_","_","_","_"],
            ["_","_","_","_","_","_","_","_"]]
-Tablero = [["_","_","_","_","_","_","_","_"],
-           ["_","O","_","_","_","_","_","_"],
-           ["_","_","O","_","X","_","O","_"],
+Tablero = [["_","_","_","X","_","X","_","X"],
+           ["O","_","X","_","X","_","X","_"],
            ["_","_","_","_","_","_","_","_"],
-           ["_","_","_","_","X","_","O","_"],
-           ["_","_","_","_","_","_","_","_"],
-           ["_","_","_","_","_","_","O","_"],
-           ["_","_","_","_","_","_","_","O"]]
+           ["O","_","_","_","X","_","_","_"],
+           ["_","_","_","O","_","X","_","_"],
+           ["_","_","_","_","O","_","O","_"],
+           ["_","_","_","O","_","_","_","O"],
+           ["_","_","O","_","O","_","O","_"]]
 
 player1 = "X"
 player2 = "O"
 
-#Damas
 def imprimir_tablero(matriz):
     print("  ", end = " ")
     for i in range(len(matriz)):
@@ -60,7 +60,7 @@ def armar_tablero(matriz):
         for j in range(len(matriz)):
             if(num1 > 0 and place):
                 matriz[i][j] = player1
-                matriz[-i-1][-j-1] = player2
+                matriz[-i-1][-j-1] = player2    
                 num1-=1
             place = not place
         place = not place
@@ -89,7 +89,12 @@ def movida_valida_v2(player_sym, enemy_sym, pos, matriz):
     print("Checking for jump") #Have to check for multiple cases       
     jump = False
     for i in range(saltos):
-        if(matriz[pos[i][0] + 1][pos[i][1] + (pos[i+1][1] - pos[i][1])//2] != "_"):
+        # print(pos[i][1]+ abs(pos[i+1][1] - pos[i][1])//2 * (-1 if(pos[i+1][1] - pos[i][1] < 0) else 1))
+        # print(-1 if((pos[i+1][1] - pos[i][1]) < 0) else 1)
+        if(matriz[pos[i][0] + 1]#6
+           [pos[i][1]+ abs(pos[i+1][1] - pos[i][1])//2 * (-1 if(pos[i+1][1] - pos[i][1] < 0) else 1)]
+            != "_"):
+            #5,2 7,4
             print("valid jump")
             jump = True
 
@@ -111,13 +116,26 @@ def movida_valida_v2(player_sym, enemy_sym, pos, matriz):
             matriz[pos[0][0]][pos[0][1]] = player_sym
         else:
             matriz[pos[-1][0]][pos[-1][1]] = player_sym
-
     else:
         if(pos[1][0] - pos[0][0] > 1):
-            return "should be no more than one space"        
+            return "should be no more than one space" 
+        if(player_sym == "O"):
+            matriz[pos[-1][0]][pos[-1][1]] = "_"
+        else:
+            matriz[pos[0][0]][pos[0][1]] = "_"  
+        if(player_sym == "O"):
+            matriz[pos[0][0]][pos[0][1]] = player_sym
+        else:
+            matriz[pos[-1][0]][pos[-1][1]] = player_sym   
 
-Tablero = crear_tablero()
-Tablero = armar_tablero(Tablero)
+def finish_condition(matriz, player_sym, enemy_sym):
+    num_pieces = [i.count(enemy_sym) for i in matriz] 
+    if(sum(num_pieces) == 0):
+        return player_sym
+    return False
+     
+# Tablero = crear_tablero()
+# Tablero = armar_tablero(Tablero)
 imprimir_tablero(Tablero)
 
 while True:
@@ -147,6 +165,10 @@ while True:
             print("Valid move")
             imprimir_tablero(Tablero)
             break
+    winner = finish_condition(Tablero, player1, player2)
+    if(winner):
+        print("Ganador", winner)
+        break
     #Player 2 turn
     while True:
         posicion1 = input("Player " + player2 + " select a piece by its coordinates: ").split(",")
@@ -173,27 +195,7 @@ while True:
             print("Valid move")
             imprimir_tablero(Tablero)
             break
-    break
-#         fila = posicion//3
-#         columna = posicion%3
-#         if(valid_spot(Tablero, (fila, columna))):
-#             Tablero[fila][columna] = "X"
-#             break
-#         print("Posicion no valida intente denuevo")    
-#     imprimir_tablero(Tablero)
-#     ganador = condicion_de_termino(Tablero)
-#     if(ganador):
-#         break
-#     while True:
-#         posicion = int(input("Jugador 2 elija una casilla del 1 al 9: "))-1
-#         fila = posicion//3
-#         columna = posicion%3
-#         if(valid_spot(Tablero, (fila, columna))):
-#             Tablero[fila][columna] = "O"
-#             break
-#         print("Posicion no valida intente denuevo")
-#     imprimir_tablero(Tablero)
-#     ganador = condicion_de_termino(Tablero)
-#     if(ganador):
-#         break
-# print("Gano " + ganador)
+    winner = finish_condition(Tablero, player2, player1)
+    if(winner):
+        print("Ganador", winner)
+        break
