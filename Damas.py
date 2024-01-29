@@ -6,14 +6,13 @@ Created on Tue Apr 30 20:05:12 2019
 """
 
 #Keep testing for player 2
-#Error with  single move for player 2
 Tablero = [["_","_","_","_","_","_","_","_"],
+           ["_","_","_","_","_","X","_","_"],
+           ["_","_","_","_","X","_","_","_"],
            ["_","_","_","_","_","_","_","_"],
+           ["_","_","O","_","O","_","_","_"],
+           ["_","O","_","_","_","O","_","_"],
            ["_","_","_","_","_","_","_","_"],
-           ["_","_","_","_","_","_","_","_"],
-           ["_","_","_","_","_","_","_","_"],
-           ["_","_","_","_","_","_","_","_"],
-           ["_","X","_","_","_","_","_","_"],
            ["_","_","_","_","_","_","_","_"]]
 
 # Tablero = [["_","X","_","X","_","X","_","X"],
@@ -69,29 +68,23 @@ def armar_tablero(matriz):
 
 def move(player_sym, enemy_sym, pos, matriz):
     saltos = len(pos) - 1
-    #Move and capture through coordinates
-    if(pos[1][0] - pos[0][0] == 2):
+    #Move and capture
+    if(abs(pos[1][0] - pos[0][0]) == 2):
+        matriz[pos[0][0]][pos[0][1]] = "_"
+
         if(player_sym == "O"):
-            matriz[pos[-1][0]][pos[-1][1]] = "_"
-        else:
-            matriz[pos[0][0]][pos[0][1]] = "_"
+            pos = pos[::-1]
         for i in range(saltos):
             if(matriz[pos[i][0] + 1][pos[i][1] + (pos[i+1][1] - pos[i][1])//2] == enemy_sym):
                 matriz[pos[i][0] + 1][pos[i][1] + (pos[i+1][1] - pos[i][1])//2] = "_"
         if(player_sym == "O"):
-            matriz[pos[0][0]][pos[0][1]] = player_sym
-        else:
-            matriz[pos[-1][0]][pos[-1][1]] = player_sym
+            pos = pos[::-1]
+
+        matriz[pos[-1][0]][pos[-1][1]] = player_sym
     #Move one space
-    if(pos[1][0] - pos[0][0] == 1):
-        if(player_sym == "O"):
-            matriz[pos[-1][0]][pos[-1][1]] = "_"
-        else:
-            matriz[pos[0][0]][pos[0][1]] = "_"  
-        if(player_sym == "O"):
-            matriz[pos[0][0]][pos[0][1]] = player_sym
-        else:
-            matriz[pos[-1][0]][pos[-1][1]] = player_sym
+    if(abs(pos[1][0] - pos[0][0]) == 1):
+        matriz[pos[0][0]][pos[0][1]] = "_"  
+        matriz[pos[-1][0]][pos[-1][1]] = player_sym
 
 
 #CHECK FOR KINGS, maybe just add an or case for if piece == QQ or another letter
@@ -139,99 +132,55 @@ def movida_valida(player_sym, enemy_sym, pos, matriz):
                 return "no piece to jump"
             
     # move(player_sym, enemy_sym, pos, matriz)
-    # capture = False
-    # for i in range(saltos):
-    #     if(matriz[pos[i][0] + 1]
-    #        [pos[i][1]+ abs(pos[i+1][1] - pos[i][1])//2 * (-1 if(pos[i+1][1] - pos[i][1] < 0) else 1)]
-    #         != "_"):
-    #         capture = True
-    #maybe a if(any(pos[i+1][0] - pos[i][0] != 2 for i in range(saltos)) 
-    #           and any(pos[i+1][0] - pos[i][0] != 1 for i in range(saltos)))
-    #then the movement is invalid, independent of capture or not
-    # if(capture):
-    # if(pos[1][0] - pos[0][0] == 2):
-        #maybe an if(pos[i+1][0] - pos[i][0] != 2) because results are already
-        #filtered as only all 2 space jump or all 1 space jump
-        #and so we only vall the applying capture and applying movement plus imprimir_tablero
-        #All this will need to be thoroughly checked
-        # for i in range(saltos):
-        #     if(pos[i+1][0] - pos[i][0] != 2):
-        #         if(player_sym == "O"):
-        #             return "invalid jump to "+ str(pos[i])
-        #         return "invalid jump to "+ str(pos[i+1])
-        #Applying capture
-        # if(player_sym == "O"):
-        #     matriz[pos[-1][0]][pos[-1][1]] = "_"
-        # else:
-        #     matriz[pos[0][0]][pos[0][1]] = "_"
-        # for i in range(saltos):
-        #     if(matriz[pos[i][0] + 1][pos[i][1] + (pos[i+1][1] - pos[i][1])//2] == enemy_sym):
-        #         matriz[pos[i][0] + 1][pos[i][1] + (pos[i+1][1] - pos[i][1])//2] = "_"
-        # if(player_sym == "O"):
-        #     matriz[pos[0][0]][pos[0][1]] = player_sym
-        # else:
-        #     matriz[pos[-1][0]][pos[-1][1]] = player_sym
-    # if(pos[1][0] - pos[0][0] == 1):
-    #    if(pos[1][0] - pos[0][0] > 1):
-    #        return "should be no more than one space" 
-    #    Applying movment
-    #     if(player_sym == "O"):
-    #         matriz[pos[-1][0]][pos[-1][1]] = "_"
-    #     else:
-    #         matriz[pos[0][0]][pos[0][1]] = "_"  
-    #     if(player_sym == "O"):
-    #         matriz[pos[0][0]][pos[0][1]] = player_sym
-    #     else:
-    #         matriz[pos[-1][0]][pos[-1][1]] = player_sym
-    imprimir_tablero(matriz)   
+    # imprimir_tablero(matriz)   
 
-def finish_condition(matriz, player_sym, enemy_sym):
+def finish_condition(matriz, player_sym, enemy_sym, second_turn):
     num_pieces = [i.count(enemy_sym) for i in matriz] 
     if(sum(num_pieces) == 0):
-        return player_sym + " wins by eliminating " + enemy_sym + "`s pieces"
-    #Check for left right single or jump moves for X and O player for every piece
-    #if all pieces throw error then cant move
-    #If this is true for both players then tie
-    #ESTO NO VA A FUNCIONAR PORQUE EL MOVIMIENTO ESTA EN EL CHECQUEO, ASIQUE CADA VEZ QUE REVISE LO VA A MOVER
+        return player_sym + " wins by eliminating " + enemy_sym + "`s pieces", False
     #CHECKEAR EL PASO A PASO HAY COSAS RARAS
-    #cHECK FOR WIN BY BLOCK AFTER TURN IN CASE THE OTHER PLAYER CAN MOVE ENABLING A MOVE FOR THE BLOCKED PLAYER
     possible_mov_player = []
     possible_mov_enemy = []
     extra = 0
     for row in range(len(matriz)):
         for column in range(len(matriz)):
             pos = [row, column]
-            if(matriz[row][column] == player_sym):   
+            if(matriz[row][column] == "X"):   
                 extra+=1
-                possible_mov_player.append(bool(movida_valida(player_sym, enemy_sym, [pos, [pos[0]+1, pos[1]+1]], matriz)))
-                possible_mov_player.append(bool(movida_valida(player_sym, enemy_sym, [pos, [pos[0]+1, pos[1]-1]], matriz)))
-                possible_mov_player.append(bool(movida_valida(player_sym, enemy_sym, [pos, [pos[0]+2, pos[1]+2]], matriz)))
-                possible_mov_player.append(bool(movida_valida(player_sym, enemy_sym, [pos, [pos[0]+2, pos[1]-2]], matriz)))
-            if(matriz[row][column] == enemy_sym): 
+                possible_mov_player.append(bool(movida_valida("X", "O", [pos, [pos[0]+1, pos[1]+1]], matriz)))
+                possible_mov_player.append(bool(movida_valida("X", "O", [pos, [pos[0]+1, pos[1]-1]], matriz)))
+                possible_mov_player.append(bool(movida_valida("X", "O", [pos, [pos[0]+2, pos[1]+2]], matriz)))
+                possible_mov_player.append(bool(movida_valida("X", "O", [pos, [pos[0]+2, pos[1]-2]], matriz)))
+            if(matriz[row][column] == "O"): 
                 extra+=1
-                possible_mov_enemy.append(bool(movida_valida(enemy_sym, player_sym, [pos, [pos[0]-1, pos[1]+1]], matriz)))
-                possible_mov_enemy.append(bool(movida_valida(enemy_sym, player_sym, [pos, [pos[0]-1, pos[1]-1]], matriz)))
-                possible_mov_enemy.append(bool(movida_valida(enemy_sym, player_sym, [pos, [pos[0]-2, pos[1]+2]], matriz)))
-                possible_mov_enemy.append(bool(movida_valida(enemy_sym, player_sym, [pos, [pos[0]-2, pos[1]-2]], matriz)))
+                possible_mov_enemy.append(bool(movida_valida("O", "X", [pos, [pos[0]-1, pos[1]+1]], matriz)))
+                possible_mov_enemy.append(bool(movida_valida("O", "X", [pos, [pos[0]-1, pos[1]-1]], matriz)))
+                possible_mov_enemy.append(bool(movida_valida("O", "X", [pos, [pos[0]-2, pos[1]+2]], matriz)))
+                possible_mov_enemy.append(bool(movida_valida("O", "X", [pos, [pos[0]-2, pos[1]-2]], matriz)))
     # print(possible_mov_player)
     # print(possible_mov_enemy)
     if(all(possible_mov_player) and all(possible_mov_enemy)):
-       return "Tie by inability to move"
-    #CHECK AGAIN AFTER OPPONENT MOVES, MAYBE BY RETURNING ANOTHER STATMENT TRUE/FALSE
+       return "Tie by inability to move", False
     if(all(possible_mov_player)):
-       return enemy_sym + " wins by blocking " + player_sym
+        if(second_turn):
+            return enemy_sym + " wins by blocking " + player_sym
+        return False, True
     if(all(possible_mov_enemy)):
-    #CHECK AGAIN AFTER OPPONENT MOVES, MAYBE BY RETURNING ANOTHER STATMENT TRUE/FALSE
-       return player_sym + " wins by blocking " + enemy_sym
-    return False
+       if(second_turn):
+           return player_sym + " wins by blocking " + enemy_sym, False
+       return False, True
+
+    return False, False
      
-Tablero = crear_tablero()
-Tablero = armar_tablero(Tablero)
+# Tablero = crear_tablero()
+# Tablero = armar_tablero(Tablero)
+imprimir_tablero(Tablero)
+second_turn_1 = False
+second_turn_2 = False
 
 while True:
     #Player 1 turn
     while True:
-        imprimir_tablero(Tablero)
         posicion1 = input("Player " + player1 + " select a piece by its coordinates: ").split(",")
         posicion1 = list(int(item) for item in posicion1)
         print(posicion1)
@@ -244,19 +193,20 @@ while True:
         error = movida_valida(player1, player2, [posicion1] + posicion2, Tablero)
         if(error):
             print("Not a valid movement,", error)
+            imprimir_tablero(Tablero)
             continue
         else:
             print("Valid move")
             move(player1, player2, [posicion1] + posicion2, Tablero)
+            imprimir_tablero(Tablero)
             break
-    winner = finish_condition(Tablero, player1, player2)
+    winner, second_turn_1 = finish_condition(Tablero, player1, player2, second_turn_1)
     if(winner):
         print(winner)
         break
 
     #Player 2 turn
     while True:
-        imprimir_tablero(Tablero)
         posicion1 = input("Player " + player2 + " select a piece by its coordinates: ").split(",")
         posicion1 = list(int(item) for item in posicion1)
         print(posicion1)
@@ -269,12 +219,14 @@ while True:
         error = movida_valida(player2, player1, [posicion1] + posicion2, Tablero)
         if(error):
             print("Not a valid movement,", error)
+            imprimir_tablero(Tablero)
             continue
         else:
             print("Valid move")
             move(player2, player1, [posicion1] + posicion2, Tablero)
+            imprimir_tablero(Tablero)
             break
-    winner = finish_condition(Tablero, player2, player1)
+    winner, second_turn_2 = finish_condition(Tablero, player2, player1, second_turn_2)
     if(winner):
         print(winner)
         break
