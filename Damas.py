@@ -4,26 +4,18 @@ Created on Tue Apr 30 20:05:12 2019
 
 @author: lucas
 """
-
-#Need to implement King as a piece and movement and conditions, kings also move differently so finish condistion has to be changed
-# but finish condition should be easy because if it can move one thats enough and if it can jump once thats enough
+#Will need to implement a rules tab because of the different version of checkers
 Tablero = [["_","_","_","_","_","_","_","_"],
-           ["_","_","_","_","_","X","_","_"],
-           ["_","_","_","_","K","_","_","_"],
+           ["_","_","_","_","_","O","_","_"],
            ["_","_","_","_","_","_","_","_"],
-           ["_","_","O","_","O","_","_","_"],
-           ["_","O","_","_","_","O","_","_"],
+           ["_","_","_","_","_","_","_","_"],
+           ["_","_","_","_","_","_","_","_"],
+           ["_","_","_","_","_","X","_","_"],
            ["_","_","_","_","_","_","_","_"],
            ["_","_","_","_","_","_","_","_"]]
 
-
-#maybe use a list?
 player1 = ["X", "K"]
-# player1 = "X"
-# player1_king = "K"
 player2 = ["O", "Q"]
-# player2 = "O"
-# player2_king = "Q"
 kings = ["K", "Q"]
 
 def imprimir_tablero(matriz):
@@ -71,13 +63,15 @@ def move(player_sym, enemy_sym, pos, matriz):
     #Move and capture
     if(abs(pos[1][0] - pos[0][0]) == 2):
         matriz[pos[0][0]][pos[0][1]] = "_"
-        if(player_sym in player2):
-            pos = pos[::-1]
+        # if(player_sym in player2):
+        #     pos = pos[::-1]
         for i in range(saltos):
-            if(matriz[pos[i][0] + 1][pos[i][1] + (pos[i+1][1] - pos[i][1])//2] == enemy_sym[0]):
-                matriz[pos[i][0] + 1][pos[i][1] + (pos[i+1][1] - pos[i][1])//2] = "_"
-        if(player_sym in player2):
-            pos = pos[::-1]
+            print(pos[i][0] + (-1 if(pos[i+1][0] < pos[i][0]) else 1), pos[i][1] + (-1 if(pos[i+1][1] < pos[i][1]) else 1))
+            if(matriz[pos[i][0] + (-1 if(pos[i+1][0] < pos[i][0]) else 1)]
+               [pos[i][1] + (-1 if(pos[i+1][1] < pos[i][1]) else 1)] in enemy_sym):
+                matriz[pos[i][0] + (-1 if(pos[i+1][0] < pos[i][0]) else 1)][pos[i][1] + (-1 if(pos[i+1][1] < pos[i][1]) else 1)] = "_"
+        # if(player_sym in player2):
+        #     pos = pos[::-1]
         matriz[pos[-1][0]][pos[-1][1]] = piece
 
     #Move one space
@@ -86,7 +80,6 @@ def move(player_sym, enemy_sym, pos, matriz):
         matriz[pos[-1][0]][pos[-1][1]] = piece
 
 #CHECK FOR KINGS
-#Add the piece type as argument?
 def movida_valida(player_sym, enemy_sym, pos, matriz):
     piece = matriz[pos[0][0]][pos[0][1]]
     if(piece not in player_sym):
@@ -105,10 +98,6 @@ def movida_valida(player_sym, enemy_sym, pos, matriz):
     if(any(coordinate != "_" for coordinate in moves)):
         return "requires empty square"
 
-    #THIS NEEDS TO BE CHECKED FOR PLAYER 2 KINGS
-    if(piece in player2):
-        pos = pos[::-1]
-
     #Checking if diagonal
     for i in range(saltos):
         if(abs(pos[i+1][0] - pos[i][0]) != abs(pos[i+1][1] - pos[i][1])):
@@ -117,62 +106,61 @@ def movida_valida(player_sym, enemy_sym, pos, matriz):
     #Checking if forward and correct distance unless king
     if(piece not in kings):
         for i in range(saltos):
-            if(pos[i][0] >= pos[i+1][0]):
+            if(pos[i][0] >= pos[i+1][0] and piece in player1):
                 return "should be forward"
-        #Checking for correct distance
-        if(any(pos[i+1][0] - pos[i][0] != 2 for i in range(saltos)) 
-                and any(pos[i+1][0] - pos[i][0] != 1 for i in range(saltos))):
-            return "invalid distance"
-    else:
-        internal_pieces = []
-        for i in range(saltos):
-            for j in range(abs(pos[i+1][0] - pos[i][0])):
-                #need to choose if to revert the pos[::-1] or if to figure out how to work this
-                #otra opcion es hacer una funcion que me invierta la matriz y si es que pertenece a player2 encontes probar con la matriz invertida
-                internal_pieces.append(matriz[pos[i+1][0] + 1])
+            if(pos[i][0] <= pos[i+1][0] and piece in player2):
+                return "should be forward"
+            
+    #Checking for correct distance
+    if(any(abs(pos[i+1][0] - pos[i][0]) != 2 for i in range(saltos)) 
+            and any(abs(pos[i+1][0] - pos[i][0]) != 1 for i in range(saltos))):
+        return "invalid distance"
 
     #Check if there is a piece to jump
-    if(pos[i+1][0] - pos[i][0] == 2):
+    if(abs(pos[i+1][0] - pos[i][0]) == 2):
         for i in range(saltos):
-            if(matriz[pos[i][0] + 1]
-                    [pos[i][1]+ abs(pos[i+1][1] - pos[i][1])//2 * (-1 if(pos[i+1][1] - pos[i][1] < 0) else 1)]
-            == "_"):
+            if(matriz[pos[i][0] + (-1 if(pos[i+1][0] < pos[i][0]) else 1)]
+                    [pos[i][1] + (-1 if(pos[i+1][1] < pos[i][1]) else 1)] == "_"):
                 return "no piece to jump"
     # move(player_sym, enemy_sym, pos, matriz)
     # imprimir_tablero(matriz)   
 
 def finish_condition(matriz, player_sym, enemy_sym, second_turn):
     num_pieces = [i.count(enemy_sym[0]) for i in matriz] 
+    num_pieces.append(sum([i.count(enemy_sym[1]) for i in matriz]))
     if(sum(num_pieces) == 0):
-        return player_sym[0] + " wins by eliminating " + enemy_sym[0] + "`s pieces", False
-    
+        return player_sym[0] + " wins by eliminating " + enemy_sym[0] + "`s pieces", True
     possible_mov_player = []
     possible_mov_enemy = []
+    #Check for available moves, needs to check for kings
     for row in range(len(matriz)):
         for column in range(len(matriz)):
             pos = [row, column]
-            if(matriz[row][column] == "X"):   
-                possible_mov_player.append(bool(movida_valida("X", "O", [pos, [pos[0]+1, pos[1]+1]], matriz)))
-                possible_mov_player.append(bool(movida_valida("X", "O", [pos, [pos[0]+1, pos[1]-1]], matriz)))
-                possible_mov_player.append(bool(movida_valida("X", "O", [pos, [pos[0]+2, pos[1]+2]], matriz)))
-                possible_mov_player.append(bool(movida_valida("X", "O", [pos, [pos[0]+2, pos[1]-2]], matriz)))
-            if(matriz[row][column] == "O"): 
-                possible_mov_enemy.append(bool(movida_valida("O", "X", [pos, [pos[0]-1, pos[1]+1]], matriz)))
-                possible_mov_enemy.append(bool(movida_valida("O", "X", [pos, [pos[0]-1, pos[1]-1]], matriz)))
-                possible_mov_enemy.append(bool(movida_valida("O", "X", [pos, [pos[0]-2, pos[1]+2]], matriz)))
-                possible_mov_enemy.append(bool(movida_valida("O", "X", [pos, [pos[0]-2, pos[1]-2]], matriz)))
+            options = [[pos[0]+1, pos[1]+1], [pos[0]+1, pos[1]-1], [pos[0]+2, pos[1]+2], [pos[0]+2, pos[1]-2],
+                       [pos[0]-1, pos[1]+1], [pos[0]-1, pos[1]-1], [pos[0]-2, pos[1]+2], [pos[0]-2, pos[1]+2]]
+            if(matriz[row][column] in player1):
+                for i in options:
+                    if(options.index(i) > 3 and matriz[row][column] not in kings):
+                        break
+                    possible_mov_player.append(bool(movida_valida(player1, player2, [pos, i], matriz)))
+            if(matriz[row][column] in player2): 
+                for i in options:
+                    if(options.index(i) < 4 and matriz[row][column] not in kings):
+                        continue
+                    possible_mov_enemy.append(bool(movida_valida(player2, player1, [pos, i], matriz)))
 
+    print(possible_mov_player)
+    print(possible_mov_enemy)
     if(all(possible_mov_player) and all(possible_mov_enemy)):
-       return "Tie by inability to move", False
+       return "Tie by inability to move", True
     if(all(possible_mov_player)):
         if(second_turn):
-            return enemy_sym + " wins by blocking " + player_sym
+            return enemy_sym[0] + " wins by blocking " + player_sym[0], False
         return False, True
     if(all(possible_mov_enemy)):
        if(second_turn):
-           return player_sym + " wins by blocking " + enemy_sym, False
+           return player_sym[0] + " wins by blocking " + enemy_sym[0], False
        return False, True
-
     return False, False
      
 # Tablero = crear_tablero()
@@ -183,7 +171,7 @@ second_turn_2 = False
 
 while True:
     #Player 1 turn
-    while True:
+    while not second_turn_1:
         posicion1 = input("Player " + player1[0] + " select a piece by its coordinates: ").split(",")
         posicion1 = list(int(item) for item in posicion1)
         print(posicion1)
@@ -202,6 +190,8 @@ while True:
         else:
             print("Valid move")
             move(player1, player2, [posicion1] + posicion2, Tablero)
+            if(posicion2[-1][0] == 7):
+                Tablero[posicion2[-1][0]][posicion2[-1][1]] = "K"
             imprimir_tablero(Tablero)
             break
     winner, second_turn_1 = finish_condition(Tablero, player1, player2, second_turn_1)
@@ -210,7 +200,7 @@ while True:
         break
 
     #Player 2 turn
-    while True:
+    while not second_turn_2:
         posicion1 = input("Player " + player2[0] + " select a piece by its coordinates: ").split(",")
         posicion1 = list(int(item) for item in posicion1)
         print(posicion1)
@@ -229,6 +219,8 @@ while True:
         else:
             print("Valid move")
             move(player2, player1, [posicion1] + posicion2, Tablero)
+            if(posicion2[-1][0] == 0):
+                Tablero[posicion2[-1][0]][posicion2[-1][1]] = "Q"
             imprimir_tablero(Tablero)
             break
     winner, second_turn_2 = finish_condition(Tablero, player2, player1, second_turn_2)
