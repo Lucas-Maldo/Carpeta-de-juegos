@@ -4,34 +4,56 @@ Created on Tue Apr 30 20:05:12 2019
 
 @author: lucas
 """
+import pygame
+import sys
+
+SIZE = 800
+SQUARE = SIZE/8
+print(SQUARE)
+
+pygame.init()
+WINDOW = pygame.display.set_mode((SIZE, SIZE))
+pygame.display.set_caption('Checkers')
+
+WHITE = pygame.image.load('Carpeta-de-juegos/checkers_assets/white_checkers_piece.png')
+BLACK = pygame.image.load('Carpeta-de-juegos/checkers_assets/black_checkers_piece.png')
+WHITE_KING = pygame.image.load('Carpeta-de-juegos/checkers_assets/white_checkers_king.png')
+BLACK_KING = pygame.image.load('Carpeta-de-juegos/checkers_assets/black_checkers_king.png')
+BOARD = pygame.image.load('Carpeta-de-juegos/checkers_assets/checkers_board.png')
 #Will need to implement a rules tab because of the different version of checkers
-Tablero = [["_","_","_","_","_","_","_","_"],
-           ["_","_","_","_","_","O","_","_"],
-           ["_","_","_","_","_","_","_","_"],
-           ["_","_","_","_","_","_","_","_"],
-           ["_","_","_","_","_","_","_","_"],
-           ["_","_","_","_","_","X","_","_"],
-           ["_","_","_","_","_","_","_","_"],
-           ["_","_","_","_","_","_","_","_"]]
+GREEN = (119, 153, 81)
 
 player1 = ["X", "K"]
 player2 = ["O", "Q"]
 kings = ["K", "Q"]
 
-def imprimir_tablero(matriz):
-    print("  ", end = " ")
-    for i in range(len(matriz)):
-        print(i, end = " ")
-    print()
-    for i in range(len(matriz)):
-        print(i, end = " ")
-        for j in range(len(matriz)):
-            print('|' + matriz[i][j], end = "")
-        print("|", i)
-    print("  ", end = " ")
-    for i in range(len(matriz)):
-        print(i, end = " ")
-    print()
+def draw_board(matriz):
+    WINDOW.blit(BOARD, (0, 0))
+    for i, row in enumerate(matriz):
+        for j, square in enumerate(row):
+            if(square == "X"):
+                WINDOW.blit(WHITE, (j * SQUARE + 2, i * SQUARE + 2))
+            if(square == "O"):
+                WINDOW.blit(BLACK, (j * SQUARE + 2, i * SQUARE + 2))
+            if(square == "K"):
+                WINDOW.blit(WHITE_KING, (j * SQUARE + 2, i * SQUARE + 2))
+            if(square == "Q"):
+                WINDOW.blit(BLACK_KING, (j * SQUARE + 2, i * SQUARE + 2))
+    pygame.display.update()
+
+def highlight_select(matriz, coords):
+    print("Entro aqui")
+    y,x = coords[0]*SQUARE, coords[1]*SQUARE
+    pygame.draw.rect(WINDOW, GREEN, (x, y, SQUARE, SQUARE))
+    if(matriz[coords[0]][coords[1]] == "X"):
+        WINDOW.blit(WHITE, (x + 2, y + 2))
+    if(matriz[coords[0]][coords[1]] == "O"):
+        WINDOW.blit(BLACK, (x + 2, y + 2))
+    if(matriz[coords[0]][coords[1]] == "K"):
+        WINDOW.blit(WHITE_KING, (x + 2, y + 2))
+    if(matriz[coords[0]][coords[1]] == "Q"):
+        WINDOW.blit(BLACK_KING, (x + 2, y + 2))
+    pygame.display.update()
 
 def crear_tablero():
     size = 8
@@ -63,15 +85,11 @@ def move(player_sym, enemy_sym, pos, matriz):
     #Move and capture
     if(abs(pos[1][0] - pos[0][0]) == 2):
         matriz[pos[0][0]][pos[0][1]] = "_"
-        # if(player_sym in player2):
-        #     pos = pos[::-1]
         for i in range(saltos):
             print(pos[i][0] + (-1 if(pos[i+1][0] < pos[i][0]) else 1), pos[i][1] + (-1 if(pos[i+1][1] < pos[i][1]) else 1))
             if(matriz[pos[i][0] + (-1 if(pos[i+1][0] < pos[i][0]) else 1)]
                [pos[i][1] + (-1 if(pos[i+1][1] < pos[i][1]) else 1)] in enemy_sym):
                 matriz[pos[i][0] + (-1 if(pos[i+1][0] < pos[i][0]) else 1)][pos[i][1] + (-1 if(pos[i+1][1] < pos[i][1]) else 1)] = "_"
-        # if(player_sym in player2):
-        #     pos = pos[::-1]
         matriz[pos[-1][0]][pos[-1][1]] = piece
 
     #Move one space
@@ -111,6 +129,11 @@ def movida_valida(player_sym, enemy_sym, pos, matriz):
             if(pos[i][0] <= pos[i+1][0] and piece in player2):
                 return "should be forward"
             
+    #Check number of moves
+    if((pos[i+1][0] - pos[i][0]) == 1):
+        if(len(pos) > 2):
+            return "invalid number of moves"
+
     #Checking for correct distance
     if(any(abs(pos[i+1][0] - pos[i][0]) != 2 for i in range(saltos)) 
             and any(abs(pos[i+1][0] - pos[i][0]) != 1 for i in range(saltos))):
@@ -122,8 +145,6 @@ def movida_valida(player_sym, enemy_sym, pos, matriz):
             if(matriz[pos[i][0] + (-1 if(pos[i+1][0] < pos[i][0]) else 1)]
                     [pos[i][1] + (-1 if(pos[i+1][1] < pos[i][1]) else 1)] == "_"):
                 return "no piece to jump"
-    # move(player_sym, enemy_sym, pos, matriz)
-    # imprimir_tablero(matriz)   
 
 def finish_condition(matriz, player_sym, enemy_sym, second_turn):
     num_pieces = [i.count(enemy_sym[0]) for i in matriz] 
@@ -163,66 +184,104 @@ def finish_condition(matriz, player_sym, enemy_sym, second_turn):
        return False, True
     return False, False
      
-# Tablero = crear_tablero()
-# Tablero = armar_tablero(Tablero)
-imprimir_tablero(Tablero)
+Tablero = crear_tablero()
+Tablero = armar_tablero(Tablero)
+draw_board(Tablero)
 second_turn_1 = False
 second_turn_2 = False
 
 while True:
     #Player 1 turn
+    positions = []
     while not second_turn_1:
-        posicion1 = input("Player " + player1[0] + " select a piece by its coordinates: ").split(",")
-        posicion1 = list(int(item) for item in posicion1)
-        print(posicion1)
-        piece = Tablero[posicion1[0]][posicion1[1]]
-        if(piece not in player1):
-            print("Not a valid piece")
+        turn = True
+        for event in pygame.event.get():                    
+            if event.type== pygame.QUIT:
+                print('EXIT SUCCESSFUL')
+                pygame.quit()
+                sys.exit()
+            if(event.type == pygame.MOUSEBUTTONDOWN):
+                x,y = pygame.mouse.get_pos()
+                column = int(x//SQUARE)
+                row = int(y//SQUARE)
+                piece = Tablero[row][column]
+                if(piece in player1):
+                    positions = [(row, column)]
+                    draw_board(Tablero)
+                    highlight_select(Tablero, positions[0])
+                    continue
+                if(positions):
+                    positions.append((row, column))
+                    highlight_select(Tablero, positions[-1])
+                if(len(positions) >= 2):
+                    error = movida_valida(player1, player2, positions, Tablero)
+                    if(error):
+                        print("Not a valid movement,", error)
+                        draw_board(Tablero)
+                        positions = []
+                       
+                #two options, if jump keep looking for moves while maintaining positions for card or get all positions instantly
+            if(event.type == pygame.KEYDOWN and len(positions) >= 2):
+                print("Termino") 
+                if(event.key == pygame.K_SPACE):
+                    turn = False
+                    break
+            print(positions)
+        if(turn):
             continue
-        posicion2 = input("Select a place to move to: ").split(" ")
-        posicion2 = list(list(int(item) for item in coord.split(",")) for coord in posicion2)
-
-        error = movida_valida(player1, player2, [posicion1] + posicion2, Tablero)
-        if(error):
-            print("Not a valid movement,", error)
-            imprimir_tablero(Tablero)
-            continue
-        else:
-            print("Valid move")
-            move(player1, player2, [posicion1] + posicion2, Tablero)
-            if(posicion2[-1][0] == 7):
-                Tablero[posicion2[-1][0]][posicion2[-1][1]] = "K"
-            imprimir_tablero(Tablero)
-            break
+        print("Turn finished")
+        move(player1, player2, positions, Tablero)
+        if(positions[-1][0] == 7):
+            Tablero[positions[-1][0]][positions[-1][1]] = "K"
+        draw_board(Tablero)
+        break
     winner, second_turn_1 = finish_condition(Tablero, player1, player2, second_turn_1)
     if(winner):
         print(winner)
         break
 
     #Player 2 turn
+    positions = []
     while not second_turn_2:
-        posicion1 = input("Player " + player2[0] + " select a piece by its coordinates: ").split(",")
-        posicion1 = list(int(item) for item in posicion1)
-        print(posicion1)
-        piece = Tablero[posicion1[0]][posicion1[1]]
-        if(piece not in player2):
-            print("Not a valid piece")
+        turn = True
+        for event in pygame.event.get():                    
+            if event.type== pygame.QUIT:
+                print('EXIT SUCCESSFUL')
+                pygame.quit()
+                sys.exit()
+            if(event.type == pygame.MOUSEBUTTONDOWN):
+                x,y = pygame.mouse.get_pos()
+                column = int(x//SQUARE)
+                row = int(y//SQUARE)
+                piece = Tablero[row][column]
+                if(piece in player2):
+                    positions = [(row, column)]
+                    draw_board(Tablero)
+                    highlight_select(Tablero, positions[0])
+                    continue
+                if(positions):
+                    positions.append((row, column))
+                    highlight_select(Tablero, positions[-1])
+                if(len(positions) >= 2):
+                    error = movida_valida(player2, player1, positions, Tablero)
+                    if(error):
+                        print("Not a valid movement,", error)
+                        draw_board(Tablero)
+                        positions = []
+            if(event.type == pygame.KEYDOWN):
+                print("Termino") 
+                if(event.key == pygame.K_SPACE):
+                    turn = False
+                    break
+            print(positions)
+        if(turn):
             continue
-        posicion2 = input("Select a place to move to: ").split(" ")
-        posicion2 = list(list(int(item) for item in coord.split(",")) for coord in posicion2)
-
-        error = movida_valida(player2, player1, [posicion1] + posicion2, Tablero)
-        if(error):
-            print("Not a valid movement,", error)
-            imprimir_tablero(Tablero)
-            continue
-        else:
-            print("Valid move")
-            move(player2, player1, [posicion1] + posicion2, Tablero)
-            if(posicion2[-1][0] == 0):
-                Tablero[posicion2[-1][0]][posicion2[-1][1]] = "Q"
-            imprimir_tablero(Tablero)
-            break
+        print("Turn finished")
+        move(player2, player1, positions, Tablero)
+        if(positions[-1][0] == 0):
+            Tablero[positions[-1][0]][positions[-1][1]] = "Q"
+        draw_board(Tablero)
+        break
     winner, second_turn_2 = finish_condition(Tablero, player2, player1, second_turn_2)
     if(winner):
         print(winner)
