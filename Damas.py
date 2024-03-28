@@ -14,11 +14,12 @@ print(SQUARE)
 pygame.init()
 WINDOW = pygame.display.set_mode((SIZE, SIZE))
 pygame.display.set_caption('Checkers')
-WHITE = pygame.image.load('C:/Lucas things/Projects/Games/Carpeta-de-juegos/checkers/white_checkers_piece.png')
-BLACK = pygame.image.load('C:/Lucas things/Projects/Games/Carpeta-de-juegos/checkers/black_checkers_piece.png')
-WHITE_KING = pygame.image.load('C:/Lucas things/Projects/Games/Carpeta-de-juegos/checkers/white_checkers_king.png')
-BLACK_KING = pygame.image.load('C:/Lucas things/Projects/Games/Carpeta-de-juegos/checkers/black_checkers_king.png')
-BOARD = pygame.image.load('C:/Lucas things/Projects/Games/Carpeta-de-juegos/checkers/checkers_board.png')
+
+WHITE = pygame.image.load('Carpeta-de-juegos/checkers_assets/white_checkers_piece.png')
+BLACK = pygame.image.load('Carpeta-de-juegos/checkers_assets/black_checkers_piece.png')
+WHITE_KING = pygame.image.load('Carpeta-de-juegos/checkers_assets/white_checkers_king.png')
+BLACK_KING = pygame.image.load('Carpeta-de-juegos/checkers_assets/black_checkers_king.png')
+BOARD = pygame.image.load('Carpeta-de-juegos/checkers_assets/checkers_board.png')
 #Will need to implement a rules tab because of the different version of checkers
 GREEN = (119, 153, 81)
 
