@@ -7,15 +7,15 @@ Created on Tue Apr 30 20:22:30 2019
 import pygame as pg
 import sys
 from pygame.locals import *
+#correct line drawn in case of won from bottom left to up right
 
 
 WIN_SIZE = 900
 CELL_SIZE = WIN_SIZE // 3
 CELL_CENTER = CELL_SIZE//2
-board_path = "resources\\tic_tac_toe_images\\board_tic_tac.png"
-x_path = "resources\\tic_tac_toe_images\X_tic_tac.png"
-o_path = "resources\\tic_tac_toe_images\O_tic_tac.png"
-
+board_path = "tic_tac_toe_images\\board_tic_tac.png"
+x_path = "tic_tac_toe_images\X_tic_tac.png"
+o_path = "tic_tac_toe_images\O_tic_tac.png"
 class Game():
     def __init__(self):
         pg.init()
@@ -76,10 +76,10 @@ class Game():
         #diagonal
         diagonal = self.matriz[0][0] + self.matriz[1][1] + self.matriz[2][2]
         diagonal_op = self.matriz[0][2] + self.matriz[1][1] + self.matriz[2][0]
-        if(diagonal == "XXX" or diagonal_op == "XXX"):
+        if(diagonal == "XXX" or diagonal == "OOO"):
             self.win_coords = [[0,0],[2,2]]
             return "Player 1 wins!"
-        if(diagonal == "OOO" or diagonal_op == "OOO"):
+        if(diagonal_op == "XXX" or diagonal_op == "OOO"):
             self.win_coords = [[0,2],[2,0]]
             return "Player 2 wins!"
         #vacios
